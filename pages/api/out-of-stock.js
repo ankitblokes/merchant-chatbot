@@ -3,13 +3,19 @@ const { shopifyGet } = require('../../lib/shopify');
 
 export default async function handler(req, res) {
   // --- CORS headers ---
-  res.setHeader('Access-Control-Allow-Origin', '*'); // Or your Shopify domain
+  res.setHeader('Access-Control-Allow-Origin', '*'); // Or restrict to your shop domain
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
 
   // Handle preflight OPTIONS request
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+
+  // --- Simple Auth Check ---
+  const authHeader = req.headers.authorization;
+  if (!authHeader || authHeader !== `Bearer ${process.env.API_SECRET_KEY}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   try {
