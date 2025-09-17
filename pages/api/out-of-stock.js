@@ -1,21 +1,13 @@
-// pages/api/out-of-stock.js
-const { shopifyGet } = require('../../lib/shopify');
+const { shopifyGet } = require("../../lib/shopify");
 
 export default async function handler(req, res) {
   // --- CORS headers ---
-  res.setHeader('Access-Control-Allow-Origin', '*'); // Or restrict to your shop domain
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // Handle preflight OPTIONS request
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return res.status(200).end();
-  }
-
-  // --- Simple Auth Check ---
-  const authHeader = req.headers.authorization;
-  if (!authHeader || authHeader !== `Bearer ${process.env.API_SECRET_KEY}`) {
-    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   try {
@@ -36,9 +28,9 @@ export default async function handler(req, res) {
               product_id: p.id,
               title: p.title,
               variant_id: v.id,
-              variant_title: v.title || 'Default',
+              variant_title: v.title || "Default",
               sku: v.sku || null,
-              quantity: qty
+              quantity: qty,
             });
           }
         }
@@ -50,6 +42,13 @@ export default async function handler(req, res) {
 
     res.status(200).json({ out_of_stock: out, count: out.length });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: err.message,
+      debug: {
+        store: process.env.SHOPIFY_STORE,
+        version: process.env.SHOPIFY_API_VERSION,
+        tokenSet: !!process.env.SHOPIFY_ADMIN_TOKEN,
+      },
+    });
   }
 }
