@@ -12,11 +12,7 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // --- Simple Auth Check ---
-  const authHeader = req.headers.authorization;
-  if (!authHeader || authHeader !== `Bearer ${process.env.API_SECRET_KEY}`) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+
 
   // ---------------- Functions ----------------
   async function getSalesToday() {
